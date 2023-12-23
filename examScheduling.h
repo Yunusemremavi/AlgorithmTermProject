@@ -9,6 +9,7 @@
 
 using namespace std;
 
+typedef int verticesDegree;
 
 class classLists {
 public:
@@ -27,6 +28,10 @@ public:
 
 	roomList(const string& id, int size) : roomID{id}, capacity{size} {}
 };
+
+/*
+*  This class is implemented for generating adjancency graph methodç
+*/
 
 class myGraph {
 	int numberOfVertices;
@@ -53,6 +58,19 @@ public:
 		return count;
 	}
 
+	bool checkIsItNeighboor(int x, int y)
+	{
+		return adjMatrix[x][y];
+	}
+
+};
+
+class times {
+public:
+	string day;
+	int hour;
+	int min;
+	vector<string> rooms;
 };
 
 class myException : public exception {
@@ -62,12 +80,32 @@ public:
 	}
 };
 
+typedef enum : unsigned int {
+	white,
+	yellow,
+	blue,
+	red,
+	green,
+	brown,
+	black,
+	wheat,
+	hotPink,
+	pink,
+	gray,
+	silver,
+	orange,
+	royalBlue,
+	olive,
+	golden
+}colorList;
 
 
 void readClassList(const std::string& filename, std::vector<classLists>& classes);
 void readRoomCapacities(const std::string& filename, std::vector<roomList>& rooms);
 map<string, int> readClassesfromVector(vector<classLists>& vec);
 myGraph generateGraphForClasses(map<string, int> mymap, vector<classLists>& vec);
+map<int, colorList>  graphColouring(myGraph& graph, map<string, int>& mymap);
+void createExamSchedule(myGraph& graph, vector<classLists>& classes, std::vector<roomList>& rooms, map<string, int>& mapForClassandID, map<int, colorList>& mapForClassIDandColor);
 
 
 

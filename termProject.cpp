@@ -16,7 +16,9 @@ int main()
         readRoomCapacities("RoomLists.csv", vec1);
         auto i = readClassesfromVector(vec);
         myGraph x = generateGraphForClasses(i, vec);
-        cout << x.verticesDegree(5);
+        auto y = graphColouring(x, i);
+        createExamSchedule(x, vec, vec1, i, y);
+        int a;
 
     }
     catch (exception& x) {
