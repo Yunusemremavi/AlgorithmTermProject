@@ -6,6 +6,7 @@
 #include <fstream>
 #include <exception> 
 #include <map>
+#include <iterator>
 
 using namespace std;
 
@@ -67,10 +68,16 @@ public:
 
 class times {
 public:
+	string className;
 	string day;
-	int hour;
-	int min;
+	int start_hour;
+	int start_min;
+	int finish_hour;
+	int finish_min;
 	vector<string> rooms;
+
+	times() = default;
+	times(string c, string d, int sh, int sm, int fh, int fm, vector<string>& r) : className{ c }, day { d }, start_hour{ sh }, start_min{ sm }, finish_hour{ fh }, finish_min{ fm }, rooms{ r } {}
 };
 
 class myException : public exception {
@@ -105,7 +112,9 @@ void readRoomCapacities(const std::string& filename, std::vector<roomList>& room
 map<string, int> readClassesfromVector(vector<classLists>& vec);
 myGraph generateGraphForClasses(map<string, int> mymap, vector<classLists>& vec);
 map<int, colorList>  graphColouring(myGraph& graph, map<string, int>& mymap);
-void createExamSchedule(myGraph& graph, vector<classLists>& classes, std::vector<roomList>& rooms, map<string, int>& mapForClassandID, map<int, colorList>& mapForClassIDandColor);
+int totalNumberOfStudents(vector<classLists>& classes, string className);
+times func(vector<vector<vector<int>>>& room_time_list, const std::vector<roomList>& rooms, pair<int, int> duration, int numberOfStudents, int day, int hour, string className);
+vector<times>  createExamSchedule(myGraph& graph, vector<classLists>& classes, std::vector<roomList>& rooms, map<string, int>& mapForClassandID, map<int, colorList>& mapForClassIDandColor);
 
 
 
