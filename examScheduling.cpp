@@ -184,9 +184,88 @@ map<int, colorList>  graphColouring(myGraph& graph, map<string, int>& mymap)
     return colorTable;
 }
 
-void createExamSchedule(myGraph& graph, vector<classLists>& classes, std::vector<roomList>& rooms, map<string, int>& mapForClassandID, map<int, colorList>& mapForClassIDandColor)
+int totalNumberOfStudents(vector<classLists>& classes, string className)
+{
+    auto count{ 0 };
+    for (auto& i : classes) {
+        if (i.courseID == className) {
+            ++count;
+        }
+    }
+    return count;
+}
+
+times func(vector<vector<vector<int>>>& room_time_list, const std::vector<roomList>& rooms, pair<int, int> duration, int numberOfStudents, int day, int hour, string className,int* sayac)
+{
+    if ((hour < 9) || (hour > 18) || (day < 0) || (day > 5))
+        throw myException{};
+
+    vector<string> vec;
+    int temp_hour{ hour };
+    int temp_hour_2{ hour };
+    auto duration_2{ duration };
+    numberOfStudents *= 2;
+    int count{};
+
+    for (auto i = rooms.begin() + ( * sayac); i != rooms.end(); ++i) {
+        while (duration.first || duration.second) {
+            *sayac++;
+            if (room_time_list[distance(rooms.begin(), i)][day][hour - 9] == 0) {
+                if (duration.first)
+                    --duration.first;
+                else if (duration.second)
+                    duration.second = 0;
+                room_time_list[distance(rooms.begin(), i)][day][hour - 9] = 1;
+                ++hour;
+            }
+            else {
+                while (temp_hour < hour) {
+                    room_time_list[distance(rooms.begin(), i)][day][temp_hour - 9] == 0;
+                    ++temp_hour;
+                }
+                break;
+            }
+            if (hour > 18) {
+                while (temp_hour < hour) {
+                    room_time_list[distance(rooms.begin(), i)][day][temp_hour - 9] == 0;
+                    ++temp_hour;
+                }
+                count = 0;
+                temp_hour_2 = 9;
+                temp_hour = temp_hour_2;
+                hour = temp_hour;
+                duration = duration_2;
+                vec.clear();
+            }
+        }
+        if (temp_hour != hour) {
+            count += i->capacity;
+            vec.emplace_back(i->roomID);
+        }
+       
+        if (count > numberOfStudents)
+            break;
+
+        temp_hour = temp_hour_2;
+        hour = temp_hour;
+        duration = duration_2;
+        
+    }
+    if (count < numberOfStudents)
+        throw myException{};
+
+    return { className,day_of_array[day], temp_hour_2, 0, temp_hour_2 + duration_2.first, duration_2.second, vec };
+
+}
+
+vector<times> createExamSchedule(myGraph& graph, vector<classLists>& classes, std::vector<roomList>& rooms, map<string, int>& mapForClassandID, map<int, colorList>& mapForClassIDandColor)
 {
     map<int, pair<int, int>> duration;
+    map<int, int> numberOfStudents;
+
+    for (auto i = mapForClassandID.begin(); i != mapForClassandID.end(); ++i) {
+        numberOfStudents[i->second] = totalNumberOfStudents(classes, i->first);
+    }
 
     for (auto i = classes.begin(); i != classes.end(); ++i) {
         duration[mapForClassandID[i->courseID]] = pair<int, int>{ i->duration / 60, i->duration % 60 };
@@ -196,8 +275,35 @@ void createExamSchedule(myGraph& graph, vector<classLists>& classes, std::vector
 
     vector<vector<vector<int>>> room_time_list(rooms.size(), vector<vector<int>>(6, vector<int>(10)));
 
+    int day{ 0 };
+    int hour{ 9 };
+    int sayac{};
+    int hourForRefresh{};
+    int minForRefresh{};
+
+    vector<times> examTimeList;
+    examTimeList.reserve(mapForClassandID.size());
     for (colorList i = white; i <= golden; i = static_cast<colorList>(static_cast<int>(i) + 1)) {
-
+        for (auto j = mapForClassandID.begin(); j != mapForClassandID.end(); ++j) {
+            if (mapForClassIDandColor[j->second] == i) {
+                examTimeList.emplace_back(func(room_time_list, rooms, duration[j->second], numberOfStudents[j->second], day, hour, j->first,&sayac));
+                if (duration[j->second].first > hourForRefresh) {
+                    hourForRefresh = duration[j->second].first;
+                    minForRefresh = duration[j->second].second;
+                }
+                    
+            }
+        }
+        sayac = 0;
+        hour += hourForRefresh;
+        if (minForRefresh)
+            ++hour;
+        if (hour > 17) {
+            hour = 9;
+            ++day;
+        }
+        if (day > 5)
+            return examTimeList;
     }
-
+    return examTimeList;
 }

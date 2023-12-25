@@ -6,6 +6,7 @@
 
 vector<classLists> vec{};
 vector<roomList> vec1{};
+vector<times> sss;
 
 int main()
 {
@@ -17,8 +18,8 @@ int main()
         auto i = readClassesfromVector(vec);
         myGraph x = generateGraphForClasses(i, vec);
         auto y = graphColouring(x, i);
-        createExamSchedule(x, vec, vec1, i, y);
-        int a;
+        sss = createExamSchedule(x, vec, vec1, i, y);
+        
 
     }
     catch (exception& x) {
