@@ -39,6 +39,7 @@ class myGraph {
 	vector<vector<int>> adjMatrix;
 
 public:
+	myGraph() = default;
 	myGraph(int v) : numberOfVertices{ v }, adjMatrix{ v, vector<int>(v, 0) } {}
 
 	void addAdge(int x, int y)
@@ -103,7 +104,18 @@ typedef enum : unsigned int {
 	orange,
 	royalBlue,
 	olive,
-	golden
+	golden,
+	color_1,
+	color_2,
+	color_3,
+	color_4,
+	color_5,
+	color_6,
+	color_7,
+	color_8,
+	color_9,
+	color_10,
+	color_11
 }colorList;
 
 
@@ -115,6 +127,6 @@ map<int, colorList>  graphColouring(myGraph& graph, map<string, int>& mymap);
 int totalNumberOfStudents(vector<classLists>& classes, string className);
 times func(vector<vector<vector<int>>>& room_time_list, const std::vector<roomList>& rooms, pair<int, int> duration, int numberOfStudents, int day, int hour, string className);
 vector<times>  createExamSchedule(myGraph& graph, vector<classLists>& classes, std::vector<roomList>& rooms, map<string, int>& mapForClassandID, map<int, colorList>& mapForClassIDandColor);
-
+void writeToCSV(const string& filename, const vector<times>& examScheduleResult);
 
 

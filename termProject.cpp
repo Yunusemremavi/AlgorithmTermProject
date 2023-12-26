@@ -4,21 +4,25 @@
 #include <iostream>
 #include "examScheduling.h"
 
-vector<classLists> vec{};
-vector<roomList> vec1{};
-vector<times> sss;
+vector<classLists> studentAndClassListVec{};
+vector<roomList> roomListVec{};
+vector<times> examScheduleStoreVec;
+map<string, int> classAndTheirIdMap;
+myGraph graphHandle;
+map<int, colorList> classIdAndTheirColorMap;
 
 int main()
 {
     try {
-        vec.reserve(316);
-        vec1.reserve(40);
-        readClassList("ClassLists.csv", vec);
-        readRoomCapacities("RoomLists.csv", vec1);
-        auto i = readClassesfromVector(vec);
-        myGraph x = generateGraphForClasses(i, vec);
-        auto y = graphColouring(x, i);
-        sss = createExamSchedule(x, vec, vec1, i, y);
+        studentAndClassListVec.reserve(316);
+        roomListVec.reserve(40);
+        readClassList("ClassLists.csv", studentAndClassListVec);
+        readRoomCapacities("RoomLists.csv", roomListVec);
+        classAndTheirIdMap = readClassesfromVector(studentAndClassListVec);
+        graphHandle = generateGraphForClasses(classAndTheirIdMap, studentAndClassListVec);
+        classIdAndTheirColorMap = graphColouring(graphHandle, classAndTheirIdMap);
+        examScheduleStoreVec = createExamSchedule(graphHandle, studentAndClassListVec, roomListVec, classAndTheirIdMap, classIdAndTheirColorMap);
+        writeToCSV("exam_schedule_program.csv", examScheduleStoreVec);
         
 
     }
