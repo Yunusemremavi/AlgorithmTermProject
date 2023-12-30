@@ -5,6 +5,12 @@
 
 static string day_of_array[]{ "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday" };
 
+/*
+   * Each room and its availability is stored in a matrix. First index specifies room, second index specifies days, and third index
+   * specifies hour between 9 and 18.
+   */
+static vector<vector<vector<int>>> room_time_list(theNumberOfRooms, vector<vector<int>>(7, vector<int>(10)));
+
 void readClassList(const std::string& filename, std::vector<classLists>& classes)
 {
 	ifstream file(filename);
@@ -195,46 +201,62 @@ int totalNumberOfStudents(vector<classLists>& classes, string className)
     return count;
 }
 
-times func(vector<vector<vector<int>>>& room_time_list, const std::vector<roomList>& rooms, pair<int, int> duration, int numberOfStudents, int* day, int hour, string className,int* sayac)
+times calculatingExamTimesforClass(vector<vector<vector<int>>>& room_time_list, const std::vector<roomList>& rooms, pair<int, int> duration, int numberOfStudents, int* day, int *hour, string className,int* sayac)
 {
-    if ((hour < 9) || (hour > 18) || (*day < 0) || (*day > 6))
+    if ((*hour < 9) || (*hour > 18) || (*day < 0) || (*day > 6))
         throw myException{};
 
+    if (rooms.size() > theNumberOfRooms) {
+        cout << "Room Sayisini Belirtin\n";
+        throw myException{};
+    }
+    
+    /*
+    * This vector object will store room information where relevant class exam will be there.
+    */
     vector<string> vec;
 
-    int temp_hour{ hour };
-    int temp_hour_2{ hour };
+    int temp_hour{ *hour };
+    int temp_hour_2{ *hour };
     auto duration_2{ duration };
     numberOfStudents *= 2;
     int count{};
 
+    /*
+    * Each room will be checked for exam and if it is available, then it will be booked.
+    */
     for (auto i = rooms.begin() + ( * sayac); i != rooms.end(); ++i) {
+        (*sayac)++;
         while (duration.first || duration.second) {
-            (* sayac)++;
-            if (room_time_list[distance(rooms.begin(), i)][*day][hour - 9] == 0) {
+            if (room_time_list[distance(rooms.begin(), i)][*day][*hour - 9] == 0) {
                 if (duration.first)
                     --duration.first;
                 else if (duration.second)
                     duration.second = 0;
-                room_time_list[distance(rooms.begin(), i)][*day][hour - 9] = 1;
-                ++hour;
+                room_time_list[distance(rooms.begin(), i)][*day][*hour - 9] = 1;
+                ++(* hour);
             }
             else {
-                while (temp_hour < hour) {
+                while (temp_hour < *hour) {
                     room_time_list[distance(rooms.begin(), i)][*day][temp_hour - 9] = 0;
                     ++temp_hour;
                 }
+                temp_hour = temp_hour_2;
+                *hour = temp_hour;
+                duration = duration_2;
                 break;
             }
-            if (hour > 18) {
-                while (temp_hour < hour) {
-                    room_time_list[distance(rooms.begin(), i)][*day][temp_hour - 9] == 0;
+            if (*hour > 18) {
+                while (temp_hour < *hour) {
+                    room_time_list[distance(rooms.begin(), i)][*day][temp_hour - 9] = 0;
                     ++temp_hour;
                 }
                 count = 0;
+                i = rooms.begin();
+                *sayac = 0;
                 temp_hour_2 = 9;
                 temp_hour = temp_hour_2;
-                hour = temp_hour;
+                *hour = temp_hour_2;
                 ++(* day);
                 if (*day > 6)
                     throw myException{};
@@ -242,24 +264,29 @@ times func(vector<vector<vector<int>>>& room_time_list, const std::vector<roomLi
                 vec.clear();
             }
         } 
-        if (temp_hour != hour) {
+
+        if (temp_hour != *hour) {
             count += i->capacity;
             vec.emplace_back(i->roomID);
         }
-       
-        
-       
-        if (count > numberOfStudents)
-            break;
 
         temp_hour = temp_hour_2;
-        hour = temp_hour;
+        *hour = temp_hour;
         duration = duration_2;
-        
-        
+
+        if (count > numberOfStudents) {
+            break;
+        }
+            
+      
     }
-    if (count < numberOfStudents)
-        throw myException{};
+
+    if (count < numberOfStudents) {
+        vec.clear();
+        vec.emplace_back("Sinav Olusturalamadi");
+        return { className,day_of_array[*day],0, 0, 0,0, vec };
+    }
+        
 
     return { className,day_of_array[*day], temp_hour_2, 0, temp_hour_2 + duration_2.first, duration_2.second, vec };
 
@@ -267,57 +294,141 @@ times func(vector<vector<vector<int>>>& room_time_list, const std::vector<roomLi
 
 vector<times> createExamSchedule(myGraph& graph, vector<classLists>& classes, std::vector<roomList>& rooms, map<string, int>& mapForClassandID, map<int, colorList>& mapForClassIDandColor)
 {
+    /*
+    * It stores all classes as ID in key and their exam duration as pair in value.
+    */
     map<int, pair<int, int>> duration;
+
+    /*
+    * It store all classes as ID in key and how many students takes this class in value.
+    */
     map<int, int> numberOfStudents;
 
+    /*
+    * It is used for filling numberOfStudents.
+    */
     for (auto i = mapForClassandID.begin(); i != mapForClassandID.end(); ++i) {
         numberOfStudents[i->second] = totalNumberOfStudents(classes, i->first);
     }
 
+    /*
+    * It is used for filling duration.
+    */
     for (auto i = classes.begin(); i != classes.end(); ++i) {
         duration[mapForClassandID[i->courseID]] = pair<int, int>{ i->duration / 60, i->duration % 60 };
     }
-    vector<times> examTimes;
-    examTimes.reserve(mapForClassandID.size());
 
-    vector<vector<vector<int>>> room_time_list(rooms.size(), vector<vector<int>>(7, vector<int>(10)));
-
+    /*
+    * This objects will be used to calculate exact day and hour for a class.
+    */
     int day{ 0 };
-    int hour{ 9 };
+    int hour{ 9 }; 
     int sayac{};
-    int hourForRefresh{};
+    int hourForRefresh{}; 
     int minForRefresh{};
-    int dayForRefresh{day};
+    int dayForRefresh{};
 
+    /*
+    * This vector object will store exam time information for each class.
+    */
     vector<times> examTimeList;
     examTimeList.reserve(mapForClassandID.size());
+
+    /*
+    * Specific exam time for each class is calculated for loops located below. Each class has a color and
+    * examination time classes having same color will be same.
+    */
     for (colorList i = white; i <= color_11; i = static_cast<colorList>(static_cast<int>(i) + 1)) {
+        if (day != dayForRefresh) {
+            hourForRefresh = minForRefresh = 0;
+        }
         for (auto j = mapForClassandID.begin(); j != mapForClassandID.end(); ++j) {
             if (mapForClassIDandColor[j->second] == i) {
                 dayForRefresh = day;
-                examTimeList.emplace_back(func(room_time_list, rooms, duration[j->second], numberOfStudents[j->second], &day, hour, j->first,&sayac));
-                if (duration[j->second].first > hourForRefresh && duration[j->second].second > minForRefresh) {
-                    hourForRefresh = duration[j->second].first;
-                    minForRefresh = duration[j->second].second;
+
+                if (sayac > rooms.size()) {
+                    vector<string> temp_vec{ "Sinav Olusturulamadi" };
+                    times s(j->first, "none"s, 0, 0, 0, 0, temp_vec);
+                    examTimeList.emplace_back(s);
+                    sayac = 0;
+                    continue;
                 }
-                    
+
+                /*
+                * func is a function calculating exact exam time according to our restriction and returns is as a times object and then
+                * his times object is pushed to our examTimeList vector.
+                */
+                examTimeList.emplace_back(calculatingExamTimesforClass(room_time_list, rooms, duration[j->second], numberOfStudents[j->second], &day, &hour, j->first, &sayac));
+                if (hourForRefresh < examTimeList.back().finish_hour && day == dayForRefresh) {
+                    hourForRefresh = examTimeList.back().finish_hour;
+                    minForRefresh = examTimeList.back().finish_min;
+                }else if(hourForRefresh ==  examTimeList.back().finish_hour && minForRefresh < examTimeList.back().finish_min && day == dayForRefresh) {
+                    minForRefresh = examTimeList.back().finish_min;
+                }else if (day != dayForRefresh) {
+                    hourForRefresh = examTimeList.back().finish_hour;
+                    minForRefresh = examTimeList.back().finish_min;
+                    dayForRefresh = day;
+                }
             }
         }
         sayac = 0;
-        hour += hourForRefresh;
-        if (minForRefresh)
-            ++hour;
-        if (day == dayForRefresh && hour > 17) {
-            hour = 9; ++day;
+
+        hour = hourForRefresh + 1;
+
+        if (hour > 18) {
+            hourForRefresh = 0;
+            minForRefresh = 0;
+            hour = 9;
+            ++day;
         }
-        else if (hour > 17) {
-            hour = 9 + hourForRefresh;
-        }
-       
+
         if (day > 6)
             return examTimeList;
     }
+
     return examTimeList;
+}
+
+
+void bookRoom(const char* room, const char* day, int start_hour, int start_min, int duration)
+{
+    if (start_hour > 18 || start_hour < 9)
+        return;
+
+    if ((start_hour + duration) > 18)
+        return;
+    
+    int count{};
+    int roomID{7};
+    int dayID{7};
+
+    for (auto& i : roomListVec) {
+        if (i.roomID == room) {
+            roomID = count;
+            break;
+        } 
+        ++count;
+    }
+
+    count = 0;
+
+    for (int i = 0; i < 7; ++i) {
+        if (day_of_array[i] == day) {
+            dayID = count;
+            break;
+        }
+        ++count;
+    }
+
+    if ((roomID == 7) || (dayID == 7))
+        return;
+
+    while (duration) {
+        room_time_list[roomID][dayID][start_hour++ - 9] = 1;
+        --duration;
+    }
+        
+
 }
 
 void writeToCSV(const string& filename, const vector<times>& examScheduleResult) {

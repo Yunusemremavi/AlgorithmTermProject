@@ -10,6 +10,11 @@
 
 using namespace std;
 
+#define theNumberOfRooms 60
+
+class roomList;
+extern vector<roomList> roomListVec;
+
 typedef int verticesDegree;
 
 class classLists {
@@ -84,7 +89,7 @@ public:
 class myException : public exception {
 public:
 	virtual const char* what()const noexcept override {
-		return "There is an error!";
+		return "Sinav takvimi olusturulamiyor";
 	}
 };
 
@@ -125,8 +130,9 @@ map<string, int> readClassesfromVector(vector<classLists>& vec);
 myGraph generateGraphForClasses(map<string, int> mymap, vector<classLists>& vec);
 map<int, colorList>  graphColouring(myGraph& graph, map<string, int>& mymap);
 int totalNumberOfStudents(vector<classLists>& classes, string className);
-times func(vector<vector<vector<int>>>& room_time_list, const std::vector<roomList>& rooms, pair<int, int> duration, int numberOfStudents, int day, int hour, string className);
+times calculatingExamTimesforClass(vector<vector<vector<int>>>& room_time_list, const std::vector<roomList>& rooms, pair<int, int> duration, int numberOfStudents, int day, int hour, string className);
 vector<times>  createExamSchedule(myGraph& graph, vector<classLists>& classes, std::vector<roomList>& rooms, map<string, int>& mapForClassandID, map<int, colorList>& mapForClassIDandColor);
 void writeToCSV(const string& filename, const vector<times>& examScheduleResult);
+void bookRoom(const char* room, const char* day, int start_hour, int start_min, int duration);
 
 

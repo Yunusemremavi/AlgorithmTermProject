@@ -20,6 +20,7 @@ int main()
         readRoomCapacities("RoomLists.csv", roomListVec);
         classAndTheirIdMap = readClassesfromVector(studentAndClassListVec);
         graphHandle = generateGraphForClasses(classAndTheirIdMap, studentAndClassListVec);
+        bookRoom("A101", "monday", 9, 0, 6);
         classIdAndTheirColorMap = graphColouring(graphHandle, classAndTheirIdMap);
         examScheduleStoreVec = createExamSchedule(graphHandle, studentAndClassListVec, roomListVec, classAndTheirIdMap, classIdAndTheirColorMap);
         writeToCSV("exam_schedule_program.csv", examScheduleStoreVec);
