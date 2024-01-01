@@ -7,6 +7,7 @@
 #include <exception> 
 #include <map>
 #include <iterator>
+#include <tuple>
 
 using namespace std;
 

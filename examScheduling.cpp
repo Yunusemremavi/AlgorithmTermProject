@@ -1,6 +1,5 @@
 #include "examScheduling.h"
 #include <algorithm>
-
 #include <iostream>
 
 static string day_of_array[]{ "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday" };
@@ -10,6 +9,8 @@ static string day_of_array[]{ "monday", "tuesday", "wednesday", "thursday", "fri
    * specifies hour between 9 and 18.
    */
 static vector<vector<vector<int>>> room_time_list(theNumberOfRooms, vector<vector<int>>(7, vector<int>(10)));
+
+static vector < tuple<string, int, int, int, int, int>> bookHours{};
 
 void readClassList(const std::string& filename, std::vector<classLists>& classes)
 {
@@ -397,10 +398,14 @@ void bookRoom(const char* room, const char* day, int start_hour, int start_min, 
 
     if ((start_hour + duration) > 18)
         return;
-    
+
     int count{};
     int roomID{7};
     int dayID{7};
+    int d{ duration };
+
+    if (start_min && ((start_hour + duration) < 18))
+        ++duration;
 
     for (auto& i : roomListVec) {
         if (i.roomID == room) {
@@ -423,11 +428,14 @@ void bookRoom(const char* room, const char* day, int start_hour, int start_min, 
     if ((roomID == 7) || (dayID == 7))
         return;
 
+    bookHours.emplace_back(room, dayID, start_hour, start_min, d, start_min);
+
     while (duration) {
         room_time_list[roomID][dayID][start_hour++ - 9] = 1;
         --duration;
     }
-        
+    
+    
 
 }
 
@@ -445,4 +453,16 @@ void writeToCSV(const string& filename, const vector<times>& examScheduleResult)
         } 
         file << "\n";
     }
+
+    file << "\n\n-------bookedHours--------\n";
+    file << "-------Day----------,----------hour----------,----------rooms-----------------\n";
+
+    for (auto& i : bookHours) {
+        file << day_of_array[get<1>(i)] << "," << "from " << get<2>(i) << " : " << get<3>(i) << " to "
+            << get<2>(i) + get<4>(i) << " : " << get<5>(i) << "," << get<0>(i) << "\n";
+    }
+
+    file << "\n";
+
+    file.close();
 }
