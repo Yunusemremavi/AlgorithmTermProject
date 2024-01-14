@@ -296,6 +296,9 @@ times calculatingExamTimesforClass(vector<vector<vector<int>>>& room_time_list, 
 
 }
 
+/*
+* 
+*/
 vector<times> createExamSchedule(myGraph& graph, vector<classLists>& classes, std::vector<roomList>& rooms, map<string, int>& mapForClassandID, map<int, colorList>& mapForClassIDandColor)
 {
     /*
@@ -556,30 +559,3 @@ void writeToCSV(const string& filename, const vector<times>& examScheduleResult)
     file.close();
 }
 
-/*void writeToCSV(const string& filename, const vector<times>& examScheduleResult) {
-    std::ofstream file(filename);
-
-    // Write CSV header
-    file << "----------className----------,----------Day--------,---------HOUR-----------, ----------Rooms---------\n";
-
-    // Write data
-    for (const auto& d : examScheduleResult) {
-        file << d.className << "," << d.day << "," << to_string(d.start_hour) + ":"s + to_string(d.start_min) + "-"s + to_string(d.finish_hour) + ":"s + to_string(d.finish_min) << ",";
-        for (const auto r : d.rooms) {
-            file << r.data() << ",";
-        } 
-        file << "\n";
-    }
-
-    file << "\n\n-------bookedHours--------\n";
-    file << "-------Day----------,----------hour----------,----------rooms-----------------\n";
-
-    for (auto& i : bookHours) {
-        file << day_of_array[get<1>(i)] << "," << "from " << get<2>(i) << " : " << get<3>(i) << " to "
-            << get<2>(i) + get<4>(i) << " : " << get<5>(i) << "," << get<0>(i) << "\n";
-    }
-
-    file << "\n";
-
-    file.close();
-}*/

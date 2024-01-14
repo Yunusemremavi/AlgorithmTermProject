@@ -13,6 +13,7 @@ map<int, colorList> classIdAndTheirColorMap;
 
 int main()
 {
+    
     try {
         studentAndClassListVec.reserve(316);
         roomListVec.reserve(40);
@@ -31,7 +32,6 @@ int main()
     catch (exception& x) {
         cout << x.what();
     }
-
     return 0;
 }
 
