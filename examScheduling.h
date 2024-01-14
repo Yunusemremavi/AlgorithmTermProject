@@ -95,7 +95,7 @@ public:
 };
 
 typedef enum : unsigned int {
-	white,
+	white = 0,
 	yellow,
 	blue,
 	red,

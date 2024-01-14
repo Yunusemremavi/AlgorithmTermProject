@@ -10,6 +10,10 @@ static string day_of_array[]{ "monday", "tuesday", "wednesday", "thursday", "fri
    */
 static vector<vector<vector<int>>> room_time_list(theNumberOfRooms, vector<vector<int>>(7, vector<int>(10)));
 
+/*
+* This tuple object is responsible for storing booking information. Each element of tuple is room, day index, start hour,
+* start minute, finish hour, finish minute respectively.
+*/
 static vector < tuple<string, int, int, int, int, int>> bookHours{};
 
 void readClassList(const std::string& filename, std::vector<classLists>& classes)
@@ -141,6 +145,17 @@ map<int, colorList>  graphColouring(myGraph& graph, map<string, int>& mymap)
     */
     vector<pairForClouring> myvec;
     myvec.reserve(mymap.size());
+    /*
+    * This colorTable object will store class ID loceted in mymap and their colors.
+    */
+    map<int, colorList> colorTable;
+
+    colorList color{ white };
+
+    /*
+    * This checkColor object will be used to color all the vertices which is not connected to the coloured vertex, with the same color.
+    */
+    vector<string> checkColor;
 
     for (auto i = mymap.begin(); i != mymap.end(); ++i) {
         myvec.emplace_back(pairForClouring{ i->first, graph.verticesDegree(i->second) });
@@ -150,18 +165,6 @@ map<int, colorList>  graphColouring(myGraph& graph, map<string, int>& mymap)
     *  This sort function is called to store classes according to their verticesDegree
     */
     sort(myvec.begin(), myvec.end(), [](pairForClouring& x, pairForClouring& y) { return x.second > y.second; });
-
-    /*
-    * This colorTable object will store class ID loceted in mymap and their colors.
-    */
-    map<int, colorList> colorTable;
-
-    colorList color = white;
-
-    /*
-    * This checkColor object will be used to color all the vertices which is not connected to the coloured vertex, with the same color.
-    */
-    vector<string> checkColor;
 
     for (auto i = myvec.begin(); i != myvec.end(); ++i) {
         for (auto j = i; j != myvec.end(); ++j) {
@@ -298,12 +301,28 @@ vector<times> createExamSchedule(myGraph& graph, vector<classLists>& classes, st
     /*
     * It stores all classes as ID in key and their exam duration as pair in value.
     */
-    map<int, pair<int, int>> duration;
+    map<int, pair<int, int>> duration{};
 
     /*
     * It store all classes as ID in key and how many students takes this class in value.
     */
-    map<int, int> numberOfStudents;
+    map<int, int> numberOfStudents{};
+
+    /*
+    * This objects will be used to calculate exact day and hour for a class.
+    */
+    int day{ 0 };
+    int hour{ 9 };
+    int sayac{};
+    int hourForRefresh{};
+    int minForRefresh{};
+    int dayForRefresh{};
+
+    /*
+    * This vector object will store exam time information for each class.
+    */
+    vector<times> examTimeList;
+    examTimeList.reserve(mapForClassandID.size());
 
     /*
     * It is used for filling numberOfStudents.
@@ -320,24 +339,8 @@ vector<times> createExamSchedule(myGraph& graph, vector<classLists>& classes, st
     }
 
     /*
-    * This objects will be used to calculate exact day and hour for a class.
-    */
-    int day{ 0 };
-    int hour{ 9 }; 
-    int sayac{};
-    int hourForRefresh{}; 
-    int minForRefresh{};
-    int dayForRefresh{};
-
-    /*
-    * This vector object will store exam time information for each class.
-    */
-    vector<times> examTimeList;
-    examTimeList.reserve(mapForClassandID.size());
-
-    /*
     * Specific exam time for each class is calculated for loops located below. Each class has a color and
-    * examination time classes having same color will be same.
+    * examination time  for classes having same color will be at the same time.
     */
     for (colorList i = white; i <= color_11; i = static_cast<colorList>(static_cast<int>(i) + 1)) {
         if (day != dayForRefresh) {
@@ -360,6 +363,7 @@ vector<times> createExamSchedule(myGraph& graph, vector<classLists>& classes, st
                 * his times object is pushed to our examTimeList vector.
                 */
                 examTimeList.emplace_back(calculatingExamTimesforClass(room_time_list, rooms, duration[j->second], numberOfStudents[j->second], &day, &hour, j->first, &sayac));
+                
                 if (hourForRefresh < examTimeList.back().finish_hour && day == dayForRefresh) {
                     hourForRefresh = examTimeList.back().finish_hour;
                     minForRefresh = examTimeList.back().finish_min;
@@ -393,7 +397,7 @@ vector<times> createExamSchedule(myGraph& graph, vector<classLists>& classes, st
 
 void bookRoom(const char* room, const char* day, int start_hour, int start_min, int duration)
 {
-    if (start_hour > 18 || start_hour < 9)
+    if ((start_hour > 18) || (start_hour < 9))
         return;
 
     if ((start_hour + duration) > 18)
@@ -404,7 +408,7 @@ void bookRoom(const char* room, const char* day, int start_hour, int start_min, 
     int dayID{7};
     int d{ duration };
 
-    if (start_min && ((start_hour + duration) < 18))
+    if ((start_min) && ((start_hour + duration) < 18))
         ++duration;
 
     for (auto& i : roomListVec) {
@@ -430,16 +434,129 @@ void bookRoom(const char* room, const char* day, int start_hour, int start_min, 
 
     bookHours.emplace_back(room, dayID, start_hour, start_min, d, start_min);
 
-    while (duration) {
+    while (duration--) {
         room_time_list[roomID][dayID][start_hour++ - 9] = 1;
-        --duration;
     }
-    
-    
-
 }
 
 void writeToCSV(const string& filename, const vector<times>& examScheduleResult) {
+    std::ofstream file(filename);
+
+
+    // Write data
+    string examTimeforCsv{};
+
+
+    // Write CSV header
+    file << "----------MONDAY-------------\n";
+
+    for (const auto& d : examScheduleResult) {
+        if (d.day == day_of_array[0]) {
+            examTimeforCsv = to_string(d.start_hour) + ":" + to_string(d.start_min) + " - " + to_string(d.finish_hour) + ":" +
+                to_string(d.finish_min) + "     " + d.className + " -  Rooms:  ";
+            for (const auto& d1 : d.rooms) {
+                examTimeforCsv += (d1 + "; ");
+            }
+            file << examTimeforCsv << "\n";
+        }
+        else break;
+
+    }
+
+    file << "----------TUESDAY-------------\n";
+    for (const auto& d : examScheduleResult) {
+        if (d.day == day_of_array[1]) {
+            examTimeforCsv = to_string(d.start_hour) + ":" + to_string(d.start_min) + " - " + to_string(d.finish_hour) + ":" +
+                to_string(d.finish_min) + "     " + d.className + " -  Rooms:  ";
+            for (const auto& d1 : d.rooms) {
+                examTimeforCsv += (d1 + "; ");
+            }
+            file << examTimeforCsv << "\n";
+        }
+        
+
+        
+    }
+    file << "----------WEDNESDAY-------------\n";
+    for (const auto& d : examScheduleResult) {
+        if (d.day == day_of_array[2]) {
+            examTimeforCsv = to_string(d.start_hour) + ":" + to_string(d.start_min) + " - " + to_string(d.finish_hour) + ":" +
+                to_string(d.finish_min) + "     " + d.className + " -  Rooms:  ";
+            for (const auto& d1 : d.rooms) {
+                examTimeforCsv += (d1 + "; ");
+            }
+            file << examTimeforCsv << "\n";
+        }
+        
+
+    }
+
+    file << "----------THURSDAY-------------\n";
+    for (const auto& d : examScheduleResult) {
+        if (d.day == day_of_array[3]) {
+            examTimeforCsv = to_string(d.start_hour) + ":" + to_string(d.start_min) + " - " + to_string(d.finish_hour) + ":" +
+                to_string(d.finish_min) + "     " + d.className + " -  Rooms:  ";
+            for (const auto& d1 : d.rooms) {
+                examTimeforCsv += (d1 + "; ");
+            }
+            file << examTimeforCsv << "\n";
+        }
+    }
+
+    file << "----------FRIDAY-------------\n";
+    for (const auto& d : examScheduleResult) {
+        if (d.day == day_of_array[4]) {
+            examTimeforCsv = to_string(d.start_hour) + ":" + to_string(d.start_min) + " - " + to_string(d.finish_hour) + ":" +
+                to_string(d.finish_min) + "     " + d.className + " -  Rooms:  ";
+            for (const auto& d1 : d.rooms) {
+                examTimeforCsv += (d1 + "; ");
+            }
+            file << examTimeforCsv << "\n";
+        }
+
+    }
+
+    file << "----------SATURDAY-------------\n";
+    for (const auto& d : examScheduleResult) {
+        if (d.day == day_of_array[5]) {
+            examTimeforCsv = to_string(d.start_hour) + ":" + to_string(d.start_min) + " - " + to_string(d.finish_hour) + ":" +
+                to_string(d.finish_min) + "     " + d.className + " -  Rooms:  ";
+            for (const auto& d1 : d.rooms) {
+                examTimeforCsv += (d1 + "; ");
+            }
+            file << examTimeforCsv << "\n";
+        }
+
+    }
+
+    file << "----------SUNDAY-------------\n";
+    for (const auto& d : examScheduleResult) {
+        if (d.day == day_of_array[6]) {
+            examTimeforCsv = to_string(d.start_hour) + ":" + to_string(d.start_min) + " - " + to_string(d.finish_hour) + ":" +
+                to_string(d.finish_min) + "     " + d.className + " -  Rooms:  ";
+            for (const auto& d1 : d.rooms) {
+                examTimeforCsv += (d1 + "; ");
+            }
+            file << examTimeforCsv << "\n";
+        }
+ 
+
+    }
+
+    file << "\n\n-------bookedHours--------\n";
+    file << "-------Day----------,----------hour----------,----------rooms-----------------\n";
+
+    for (auto& i : bookHours) {
+        file << day_of_array[get<1>(i)] << "," << "from " << get<2>(i) << " : " << get<3>(i) << " to "
+            << get<2>(i) + get<4>(i) << " : " << get<5>(i) << "," << get<0>(i) << "\n";
+    }
+
+    file << "\n";
+
+    file.close();
+}
+
+/*void writeToCSV(const string& filename, const vector<times>& examScheduleResult) {
     std::ofstream file(filename);
 
     // Write CSV header
@@ -465,4 +582,4 @@ void writeToCSV(const string& filename, const vector<times>& examScheduleResult)
     file << "\n";
 
     file.close();
-}
+}*/
