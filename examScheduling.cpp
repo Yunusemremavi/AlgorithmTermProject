@@ -16,6 +16,10 @@ static vector<vector<vector<int>>> room_time_list(theNumberOfRooms, vector<vecto
 */
 static vector < tuple<string, int, int, int, int, int>> bookHours{};
 
+/*
+*  This function is used to read available classes from ClassLists.csv.
+*/
+
 void readClassList(const std::string& filename, std::vector<classLists>& classes)
 {
 	ifstream file(filename);
@@ -44,6 +48,10 @@ while (std::getline(file, line)) {
 
 file.close();
 }
+
+/*
+*  This function is used to read available classes from RoomLists.csv.
+*/
 
 void readRoomCapacities(const std::string& filename, std::vector<roomList>& rooms)
 {
@@ -205,6 +213,11 @@ int totalNumberOfStudents(vector<classLists>& classes, string className)
     return count;
 }
 
+/*
+* This function is implemented to read room information’s and store them in a vector. We provided an example input file and 
+  this input file should be located in the same path with .exe or if our code will be compiled again,
+  it should be located in the project folder. Also, csv file name should be same since code implementation is done considering its name
+*/
 times calculatingExamTimesforClass(vector<vector<vector<int>>>& room_time_list, const std::vector<roomList>& rooms, pair<int, int> duration, int numberOfStudents, int* day, int *hour, string className,int* sayac)
 {
     if ((*hour < 9) || (*hour > 18) || (*day < 0) || (*day > 6))
@@ -297,7 +310,9 @@ times calculatingExamTimesforClass(vector<vector<vector<int>>>& room_time_list, 
 }
 
 /*
-* 
+*   This function is implemented to determine examination times for each classes. While performing that, it is using assigned ID’s for classes, 
+*   generated graph structure,assigned colors, roomID’s and their capacities. Each examination time is stored in a vector as a times class 
+*   and this times class has class name, examination day, start hour, start min, finish hour, finish min, rooms members.
 */
 vector<times> createExamSchedule(myGraph& graph, vector<classLists>& classes, std::vector<roomList>& rooms, map<string, int>& mapForClassandID, map<int, colorList>& mapForClassIDandColor)
 {
@@ -398,7 +413,16 @@ vector<times> createExamSchedule(myGraph& graph, vector<classLists>& classes, st
 }
 
 /*
-* This function is implemented to book a room
+*   This function is implemented to book a room.
+*   
+    Please giving room value using RoomLists.csv file. If you assign differen room name, it will not work. Also, it is true for day. It should be assigned following.
+    static string day_of_array[]{ "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday" };
+
+    For example, room could be “A101” as it is located in RoomLists.csv file and also day could be “Monday” according to day_of_array object. 
+
+    duration argument should be how many hours room is booked.
+
+    Last point, if you assigned an time off hour for booking, it will not run.
 */
 void bookRoom(const char* room, const char* day, int start_hour, int start_min, int duration)
 {
@@ -434,7 +458,7 @@ void bookRoom(const char* room, const char* day, int start_hour, int start_min, 
         ++count;
     }
 
-    if ((roomID == 7) || (dayID == 7))
+    if ((roomID >= roomListVec.size()) || (dayID == 7))
         return;
 
     bookHours.emplace_back(room, dayID, start_hour, start_min, d, start_min);
@@ -444,6 +468,9 @@ void bookRoom(const char* room, const char* day, int start_hour, int start_min, 
     }
 }
 
+/*
+* This function is used to write examination times to csv file.
+*/
 void writeToCSV(const string& filename, const vector<times>& examScheduleResult) {
     std::ofstream file(filename);
 

@@ -18,6 +18,7 @@ extern vector<roomList> roomListVec;
 
 typedef int verticesDegree;
 
+
 class classLists {
 public:
 	int studentID;
@@ -41,20 +42,20 @@ public:
 */
 
 class myGraph {
-	int numberOfVertices;
-	vector<vector<int>> adjMatrix;
+	int numberOfVertices; // this is the number of vertices.
+	vector<vector<int>> adjMatrix; // this is our adj matrix.
 
 public:
 	myGraph() = default;
 	myGraph(int v) : numberOfVertices{ v }, adjMatrix{ v, vector<int>(v, 0) } {}
 
-	void addAdge(int x, int y)
+	void addAdge(int x, int y) // to add edge between two vertex or classes.
 	{
 		adjMatrix[x][y] = 1;
 		adjMatrix[y][x] = 1;
 	}
 
-	int verticesDegree(int x)
+	int verticesDegree(int x) // this function returns how many edge vertex or class have.
 	{
 		int count{};
 
@@ -66,13 +67,17 @@ public:
 		return count;
 	}
 
-	bool checkIsItNeighboor(int x, int y)
+	bool checkIsItNeighboor(int x, int y) // this function returns that two vertices have an edge or path between us.
 	{
 		return adjMatrix[x][y];
 	}
 
 };
 
+/*
+*  This class is used to store examination info for each class. After determining time zone for a class,
+*  this info is stored a times class object and then will be used.
+*/
 class times {
 public:
 	string className;
@@ -94,6 +99,9 @@ public:
 	}
 };
 
+/*
+*  This colours are used for graph algorithms. 
+*/
 typedef enum : unsigned int {
 	white = 0,
 	yellow,
@@ -130,7 +138,13 @@ typedef enum : unsigned int {
 	color_17,
 	color_18,
 	color_19,
-	color_20
+	color_20,
+	color_21,
+	color_22,
+	color_23,
+	color_24,
+	color_25,
+	color_26
 }colorList;
 
 
