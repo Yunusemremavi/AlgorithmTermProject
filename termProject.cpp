@@ -1,4 +1,15 @@
+/*
+* 
+* Group Members: 
+- BERAT YILDIZER - 235101103 
+- MUSTAFA IBRAHIM AKSU - 235101102 
+- YUNUS EMRE MAVI – 225101154
+
+*/
+
 // termProject.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// Please use here direclty and just customizing input csv files to test our algortihm because giving correct arguments to functions and
+// calling them in correct order could be complex.
 //
 
 #include <iostream>
@@ -21,11 +32,15 @@ int main()
         readRoomCapacities("RoomLists.csv", roomListVec);
         classAndTheirIdMap = readClassesfromVector(studentAndClassListVec);
         graphHandle = generateGraphForClasses(classAndTheirIdMap, studentAndClassListVec);
-        bookRoom("A101", "tuesday", 9, 30, 9);
+        bookRoom("A101", "monday", 9, 30, 9);
         bookRoom("A102", "monday", 9, 0, 9);
+        bookRoom("A103", "monday", 9, 0, 9);
+        bookRoom("A107", "monday", 9, 0, 9);
+        bookRoom("A106", "monday", 9, 30, 9);
         classIdAndTheirColorMap = graphColouring(graphHandle, classAndTheirIdMap);
         examScheduleStoreVec = createExamSchedule(graphHandle, studentAndClassListVec, roomListVec, classAndTheirIdMap, classIdAndTheirColorMap);
         writeToCSV("exam_schedule_program.csv", examScheduleStoreVec);
+        cout << "go to exam_schedule_program.csv\n";
         
 
     }
