@@ -79,7 +79,7 @@ void readRoomCapacities(const std::string& filename, std::vector<roomList>& room
 }
 
 /*
-*  This function is used for taking available class from input csv file. map container is used since it store
+*  This function is used for taking available classes from vector. map container is used since it store
 *  a pair where class id will be used as key and an integer will be used as value. Integer used value is used for
 *  generating graph adjanceny matrix.
 *
