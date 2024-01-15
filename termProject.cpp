@@ -10,9 +10,12 @@
 // termProject.cpp : This file contains the 'main' function. Program execution begins and ends there.
 // Please use here direclty and just customizing input csv files to test our algortihm because giving correct arguments to functions and
 // calling them in correct order could be complex.
+// 
+// We are ready to improve our solution and add some feature like GUI for writing a paper:) If possible, we can write a paper about that.
 //
 
 #include <iostream>
+#include <string>
 #include "examScheduling.h"
 
 vector<classLists> studentAndClassListVec{}; //this object will store student and classes located in ClassLists.csv file.
@@ -43,6 +46,7 @@ int main()
         bookRoom("A102", "monday", 9, 0, 9);
         bookRoom("A103", "monday", 9, 0, 9);
         bookRoom("A104", "monday", 9, 0, 9);
+        bookRoom("A105", "monday", 9, 30, 9);
         bookRoom("A106", "monday", 9, 30, 9);
 
         // 5. Implement graph coloring
@@ -63,13 +67,4 @@ int main()
     return 0;
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
