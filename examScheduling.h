@@ -121,7 +121,16 @@ typedef enum : unsigned int {
 	color_8,
 	color_9,
 	color_10,
-	color_11
+	color_11,
+	color_12,
+	color_13,
+	color_14,
+	color_15,
+	color_16,
+	color_17,
+	color_18,
+	color_19,
+	color_20
 }colorList;
 
 

@@ -362,8 +362,8 @@ vector<times> createExamSchedule(myGraph& graph, vector<classLists>& classes, st
                 }
 
                 /*
-                * func is a function calculating exact exam time according to our restriction and returns is as a times object and then
-                * his times object is pushed to our examTimeList vector.
+                * calculatingExamTimesforClass is a function calculating exact exam time according to our restriction and returns is as a times object and then
+                * this times object is pushed to our examTimeList vector.
                 */
                 examTimeList.emplace_back(calculatingExamTimesforClass(room_time_list, rooms, duration[j->second], numberOfStudents[j->second], &day, &hour, j->first, &sayac));
                 
@@ -397,7 +397,9 @@ vector<times> createExamSchedule(myGraph& graph, vector<classLists>& classes, st
     return examTimeList;
 }
 
-
+/*
+* This function is implemented to book a room
+*/
 void bookRoom(const char* room, const char* day, int start_hour, int start_min, int duration)
 {
     if ((start_hour > 18) || (start_hour < 9))
